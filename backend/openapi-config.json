@@ -1,0 +1,18 @@
+{
+  "generatorName": "typescript-fetch",
+  "inputSpec": "./swagger.yaml",
+  "outputDir": "../app/app/api/generated",
+  "additionalProperties": {
+    "supportsES6": true,
+    "npmName": "pdf-signing-api-client",
+    "npmVersion": "1.0.0",
+    "typescriptThreePlus": true,
+    "withInterfaces": true,
+    "useSingleRequestParameter": true,
+    "modelPropertyNaming": "camelCase"
+  },
+  "globalProperties": {
+    "apiDocs": false,
+    "modelDocs": false
+  }
+}

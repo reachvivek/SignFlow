@@ -1,0 +1,36 @@
+{
+  "name": "frontend-nextjs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.3.1",
+    "axios": "^1.12.2",
+    "dayjs": "^1.11.18",
+    "next": "15.5.5",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.296",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-draggable": "^4.5.0",
+    "react-pdf": "^10.2.0",
+    "react-signature-canvas": "^1.1.0-alpha.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-pdf": "^6.2.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.5",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

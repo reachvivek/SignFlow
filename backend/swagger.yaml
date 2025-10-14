@@ -1,0 +1,744 @@
+openapi: 3.0.0
+info:
+  title: PDF Signing Application API
+  version: 1.0.0
+  description: |
+    A comprehensive API for digital PDF document signing and verification system with role-based access control.
+
+    ## Authentication
+    Most endpoints require JWT authentication. Use the `/api/auth/login` endpoint to get a token, then include it in the `Authorization` header as `Bearer <token>`.
+
+    ## User Roles
+    - **UPLOADER**: Can upload documents, verify signed documents, and reject documents
+    - **SIGNER**: Can sign documents assigned to them
+
+    ## Document Workflow
+    1. Uploader uploads a PDF document and assigns it to a signer (status: PENDING)
+    2. Signer signs the document with a digital signature (status: SIGNED)
+    3. Uploader verifies or rejects the signed document (status: VERIFIED or REJECTED)
+  contact:
+    name: API Support
+    email: support@pdfsigning.com
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.pdfsigning.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User authentication and registration
+  - name: Documents
+    description: Document upload, signing, verification, and management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter your JWT token in the format - Bearer <token>
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 0e370fcc-d2f6-4a95-82d3-a36a3ac5df0f
+        name:
+          type: string
+          example: John Uploader
+        email:
+          type: string
+          format: email
+          example: uploader@example.com
+        role:
+          type: string
+          enum: [UPLOADER, SIGNER]
+          example: UPLOADER
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-10-13T23:00:00.000Z
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 4a0a43a5-759b-4637-8425-d033aaeadd5a
+        name:
+          type: string
+          example: Employment Contract
+        originalFileName:
+          type: string
+          example: contract.pdf
+        fileUrl:
+          type: string
+          example: /uploads/contract-1760399097126-605886090.pdf
+        status:
+          type: string
+          enum: [PENDING, SIGNED, VERIFIED, REJECTED]
+          example: PENDING
+        uploadedById:
+          type: string
+          format: uuid
+        assignedTo:
+          type: string
+          format: email
+          example: signer@example.com
+        signatureData:
+          type: string
+          nullable: true
+          example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB...
+        signedAt:
+          type: string
+          format: date-time
+          nullable: true
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+        rejectedAt:
+          type: string
+          format: date-time
+          nullable: true
+        rejectionReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        uploadedBy:
+          $ref: '#/components/schemas/UserSummary'
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Error message here
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [Health]
+      responses:
+        '200':
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: PDF Signing API is running
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - role
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  example: password123
+                role:
+                  type: string
+                  enum: [uploader, signer, UPLOADER, SIGNER]
+                  example: uploader
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: uploader@example.com
+                password:
+                  type: string
+                  example: password123
+                role:
+                  type: string
+                  enum: [uploader, signer]
+                  example: uploader
+                  description: Optional - validate that user has this role
+            examples:
+              uploader:
+                summary: Login as uploader
+                value:
+                  email: uploader@example.com
+                  password: password123
+                  role: uploader
+              signer:
+                summary: Login as signer
+                value:
+                  email: signer@example.com
+                  password: password123
+                  role: signer
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials or wrong role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Get current user profile
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents/upload:
+    post:
+      summary: Upload a new PDF document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      description: Upload a PDF document and assign it to a signer. Only uploaders can use this endpoint.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - assignedTo
+                - file
+              properties:
+                name:
+                  type: string
+                  example: Employment Contract
+                  description: Document name
+                assignedTo:
+                  type: string
+                  format: email
+                  example: signer@example.com
+                  description: Email of signer to assign document to
+                file:
+                  type: string
+                  format: binary
+                  description: PDF file to upload (max 10MB)
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  document:
+                    $ref: '#/components/schemas/Document'
+        '400':
+          description: Validation error or no file provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - uploader role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents:
+    get:
+      summary: Get documents for current user
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      description: |
+        Returns documents based on user role:
+        - UPLOADER: Returns documents they uploaded
+        - SIGNER: Returns documents assigned to them
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, SIGNED, VERIFIED, REJECTED]
+          description: Filter by document status
+      responses:
+        '200':
+          description: Documents retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents/{id}:
+    get:
+      summary: Get a single document by ID
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Document ID
+      responses:
+        '200':
+          description: Document retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  document:
+                    $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - not authorized to view this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents/{id}/sign:
+    post:
+      summary: Sign a document with digital signature
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      description: |
+        Embeds a signature image onto the PDF document. Only signers can use this endpoint and only for documents assigned to them.
+
+        **This is the most complex operation** - it modifies the actual PDF file by embedding the signature image at the bottom right of the last page.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Document ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - signatureData
+              properties:
+                signatureData:
+                  type: string
+                  example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
+                  description: Base64 encoded signature image (PNG or JPEG format)
+      responses:
+        '200':
+          description: Document signed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Document signed successfully
+                  document:
+                    $ref: '#/components/schemas/Document'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - not assigned to sign this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents/{id}/verify:
+    post:
+      summary: Verify a signed document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      description: Mark a signed document as verified. Only uploaders can verify documents they uploaded.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Document ID
+      responses:
+        '200':
+          description: Document verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Document verified successfully
+                  document:
+                    $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - uploader role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents/{id}/reject:
+    post:
+      summary: Reject a document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      description: Reject a document with a reason. Only uploaders can reject documents they uploaded.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Document ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                  minLength: 10
+                  maxLength: 500
+                  example: Document format is incorrect and needs revision
+      responses:
+        '200':
+          description: Document rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Document rejected
+                  document:
+                    $ref: '#/components/schemas/Document'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - uploader role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/documents/{id}/view:
+    get:
+      summary: Get a fresh pre-signed URL to view the document
+      tags: [Documents]
+      security:
+        - bearerAuth: []
+      description: |
+        Generates a fresh pre-signed AWS S3 URL to view or download the document.
+        The URL is valid for 1 hour. Users can only view documents they uploaded or are assigned to sign.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Document ID
+      responses:
+        '200':
+          description: Pre-signed URL generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    example: https://pdf-signing-documents-azaya.s3.ap-south-1.amazonaws.com/documents/...?X-Amz-Algorithm=AWS4-HMAC-SHA256...
+                    description: Pre-signed S3 URL valid for 1 hour
+                  expiresIn:
+                    type: integer
+                    example: 3600
+                    description: URL expiration time in seconds
+        '400':
+          description: Document file not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - not authorized to view this document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

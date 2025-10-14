@@ -1,0 +1,23 @@
+ELEGANT BLACK & WHITE EMAIL TEMPLATES FOR SIGNFLOW
+
+Common Styles:
+- Clean white background
+- Black text (#000000)
+- Gray accents (#666666) 
+- Thin black borders (1px solid #000)
+- Minimal design - no gradients
+- Sans-serif fonts (Arial, Helvetica)
+- Lots of whitespace
+
+Template Structure:
+1. Simple black header with logo
+2. White content area with padding
+3. Gray footer with legal text
+
+Key changes from current:
+- Remove purple gradients (linear-gradient)
+- Change from #667eea to #000000 (black)
+- Background from #f9fafb to #ffffff (white)
+- Borders from colored to black/gray
+- Buttons from purple to black
+

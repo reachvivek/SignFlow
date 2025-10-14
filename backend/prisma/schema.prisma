@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  // Relations
+  uploadedDocuments Document[] @relation("UploadedDocuments")
+  sessions          Session[]
+
+  @@map("users")
+}
+
+// Document model
+model Document {
+  id               String    @id @default(uuid())
+  name             String
+  originalFileName String
+  fileUrl          String
+  s3Key            String?   // AWS S3 object key for file management
+  status           Status    @default(PENDING)
+  uploadedById     String
+  assignedTo       String    // Email of signer
+  signatureData    String?   // Base64 signature
+  signedAt         DateTime?
+  verifiedAt       DateTime?
+  rejectedAt       DateTime?
+  rejectionReason  String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  uploadedBy User       @relation("UploadedDocuments", fields: [uploadedById], references: [id], onDelete: Cascade)
+  auditLogs  AuditLog[]
+
+  @@map("documents")
+  @@index([uploadedById])
+  @@index([assignedTo])
+  @@index([status])
+}
+
+// Audit Log model
+model AuditLog {
+  id          String   @id @default(uuid())
+  documentId  String
+  action      String   // e.g., "Created", "Assigned", "Signed", "Verified", "Rejected"
+  performedBy String   // Email or name of user who performed action
+  details     String?  // Additional details about the action
+  createdAt   DateTime @default(now())
+
+  // Relations
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+  @@index([documentId])
+  @@index([createdAt])
+}
+
+// Email Queue model - Production email queue system
+model EmailQueue {
+  id           String      @id @default(uuid())
+  to           String
+  subject      String
+  template     String      // Template name (otp, document-assignment, welcome)
+  data         String      // JSON stringified data for template
+  status       EmailStatus @default(PENDING)
+  attempts     Int         @default(0)
+  maxAttempts  Int         @default(3)
+  error        String?
+  sentAt       DateTime?
+  scheduledFor DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("email_queue")
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([createdAt])
+}
+
+// Session Tracking model - Track user login sessions
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  token        String   @unique
+  device       String?
+  browser      String?
+  os           String?
+  ip           String?
+  userAgent    String?
+  lastActivity DateTime @default(now())
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// OTP History model - Track all OTPs sent
+model OTPHistory {
+  id         String    @id @default(uuid())
+  email      String
+  otp        String
+  purpose    String    // "signup", "reset_password", "verify_email"
+  verified   Boolean   @default(false)
+  verifiedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+
+  @@map("otp_history")
+  @@index([email])
+  @@index([expiresAt])
+  @@index([createdAt])
+}
+
+// Enums
+enum Role {
+  UPLOADER
+  SIGNER
+}
+
+enum Status {
+  PENDING
+  SIGNED
+  VERIFIED
+  REJECTED
+}
+
+enum EmailStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+}
