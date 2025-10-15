@@ -48,7 +48,7 @@ interface Stats {
 export default function UploaderDashboard() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { showModal } = useModal();
+  const { showConfirm } = useModal();
   const [user, setUser] = useState<User | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,7 +200,7 @@ export default function UploaderDashboard() {
   }, [statusFilter, dateFilter, itemsPerPage]);
 
   const handleDeleteDocument = (documentId: string, documentName: string) => {
-    showModal(
+    showConfirm(
       "Delete Document",
       `Are you sure you want to delete "${documentName}"? This action cannot be undone.`,
       async () => {
@@ -443,7 +443,7 @@ export default function UploaderDashboard() {
 
           {/* Documents table */}
           <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[250px]">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
@@ -566,12 +566,12 @@ export default function UploaderDashboard() {
                                 <>
                                   {/* Backdrop to close menu */}
                                   <div
-                                    className="fixed inset-0 z-10"
+                                    className="fixed inset-0 z-[100]"
                                     onClick={() => setOpenMenuId(null)}
                                   />
 
                                   {/* Menu dropdown */}
-                                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 py-1">
+                                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[101] py-1">
                                     <button
                                       onClick={() => {
                                         handleViewAuditLog(doc.id, doc.name);

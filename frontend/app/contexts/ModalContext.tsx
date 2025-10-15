@@ -91,22 +91,29 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
 
       {/* Modal Component */}
       {modalOptions && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={modalOptions.type === "alert" ? handleConfirm : handleCancel}
           />
 
           {/* Modal Content */}
-          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 transform transition-all">
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 transform transition-all animate-in fade-in zoom-in duration-200">
+            {/* Icon */}
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
             {/* Title */}
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
+            <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
               {modalOptions.title}
             </h3>
 
             {/* Message */}
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 text-center mb-6">
               {modalOptions.message}
             </p>
 
@@ -117,7 +124,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={modalOptions.placeholder}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all mb-6 text-sm"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && inputValue.trim()) {
@@ -130,11 +137,11 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
               {modalOptions.type !== "alert" && (
                 <button
                   onClick={handleCancel}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="flex-1 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all font-medium text-sm"
                 >
                   {modalOptions.cancelText || "Cancel"}
                 </button>
@@ -142,7 +149,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
               <button
                 onClick={handleConfirm}
                 disabled={modalOptions.type === "prompt" && !inputValue.trim()}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm"
               >
                 {modalOptions.confirmText || "OK"}
               </button>

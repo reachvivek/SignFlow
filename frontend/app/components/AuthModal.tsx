@@ -67,21 +67,13 @@ export default function AuthModal({
   // Countdown timer
   useEffect(() => {
     if (resendCountdown > 0) {
-      const timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
+      const timer = setTimeout(
+        () => setResendCountdown(resendCountdown - 1),
+        1000
+      );
       return () => clearTimeout(timer);
     }
   }, [resendCountdown]);
-
-  // Auto-fill test credentials
-  const useTestCredentials = () => {
-    if (role === "uploader") {
-      setEmail("uploader@example.com");
-      setPassword("password123");
-    } else {
-      setEmail("signer@example.com");
-      setPassword("password123");
-    }
-  };
 
   // LOGIN HANDLER
   const handleLogin = async (e: React.FormEvent) => {
@@ -242,7 +234,10 @@ export default function AuthModal({
       if (completeOtp.length === 6) {
         // Submit after a tiny delay with the complete OTP
         setTimeout(() => {
-          handleVerifyOTP({ preventDefault: () => {} } as React.FormEvent, completeOtp);
+          handleVerifyOTP(
+            { preventDefault: () => {} } as React.FormEvent,
+            completeOtp
+          );
         }, 100);
       }
     }
@@ -271,7 +266,10 @@ export default function AuthModal({
     // Auto-submit if pasted 6 digits
     if (pastedData.length === 6) {
       setTimeout(() => {
-        handleVerifyOTP({ preventDefault: () => {} } as React.FormEvent, pastedData);
+        handleVerifyOTP(
+          { preventDefault: () => {} } as React.FormEvent,
+          pastedData
+        );
       }, 100);
     }
   };
@@ -308,9 +306,12 @@ export default function AuthModal({
   // Password strength
   const getPasswordStrength = (pwd: string) => {
     if (pwd.length === 0) return { strength: 0, label: "", color: "" };
-    if (pwd.length < 6) return { strength: 1, label: "Weak", color: "bg-red-500" };
-    if (pwd.length < 10) return { strength: 2, label: "Fair", color: "bg-yellow-500" };
-    if (pwd.length < 14) return { strength: 3, label: "Good", color: "bg-blue-500" };
+    if (pwd.length < 6)
+      return { strength: 1, label: "Weak", color: "bg-red-500" };
+    if (pwd.length < 10)
+      return { strength: 2, label: "Fair", color: "bg-yellow-500" };
+    if (pwd.length < 14)
+      return { strength: 3, label: "Good", color: "bg-blue-500" };
     return { strength: 4, label: "Strong", color: "bg-green-500" };
   };
 
@@ -329,18 +330,32 @@ export default function AuthModal({
                 {mode === "login" ? "Welcome Back" : "Create Account"}
               </h2>
               {mode === "signup" && step === 2 && (
-                <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">{email}</p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">
+                  {email}
+                </p>
               )}
               {mode === "signup" && step === 3 && (
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">Almost there!</p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Almost there!
+                </p>
               )}
             </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -377,27 +392,51 @@ export default function AuthModal({
             <div className="mb-6">
               <div className="flex items-center mb-3">
                 {[1, 2, 3].map((s, index) => (
-                  <div key={s} className="flex items-center" style={{ width: index === 0 || index === 2 ? '33.33%' : '33.34%' }}>
+                  <div
+                    key={s}
+                    className="flex items-center"
+                    style={{
+                      width: index === 0 || index === 2 ? "33.33%" : "33.34%",
+                    }}
+                  >
                     {index > 0 && (
-                      <div className={`h-1 flex-1 ${step > index ? "bg-blue-600" : "bg-gray-200"}`} />
+                      <div
+                        className={`h-1 flex-1 ${
+                          step > index ? "bg-blue-600" : "bg-gray-200"
+                        }`}
+                      />
                     )}
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        step >= s ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
-                      } ${index === 0 ? 'ml-0' : 'mx-2'} ${index === 2 ? 'mr-0' : ''}`}
+                        step >= s
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-200 text-gray-600"
+                      } ${index === 0 ? "ml-0" : "mx-2"} ${
+                        index === 2 ? "mr-0" : ""
+                      }`}
                     >
                       {s}
                     </div>
                     {index < 2 && (
-                      <div className={`h-1 flex-1 ${step > s ? "bg-blue-600" : "bg-gray-200"}`} />
+                      <div
+                        className={`h-1 flex-1 ${
+                          step > s ? "bg-blue-600" : "bg-gray-200"
+                        }`}
+                      />
                     )}
                   </div>
                 ))}
               </div>
               <div className="flex">
-                <div className="flex-1 text-xs text-gray-600 text-left">Details</div>
-                <div className="flex-1 text-xs text-gray-600 text-center">Verify</div>
-                <div className="flex-1 text-xs text-gray-600 text-right">Password</div>
+                <div className="flex-1 text-xs text-gray-600 text-left">
+                  Details
+                </div>
+                <div className="flex-1 text-xs text-gray-600 text-center">
+                  Verify
+                </div>
+                <div className="flex-1 text-xs text-gray-600 text-right">
+                  Password
+                </div>
               </div>
             </div>
           )}
@@ -412,25 +451,11 @@ export default function AuthModal({
           {/* LOGIN FORM */}
           {mode === "login" && (
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* Test Credentials */}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs">
-                <p className="font-semibold text-blue-900 mb-1">Test Credentials</p>
-                <p className="text-blue-700 mb-2">
-                  <strong>Email:</strong> {role === "uploader" ? "uploader@example.com" : "signer@example.com"}
-                  <br />
-                  <strong>Password:</strong> password123
-                </p>
-                <button
-                  type="button"
-                  onClick={useTestCredentials}
-                  className="text-blue-600 hover:text-blue-700 font-semibold underline"
-                >
-                  Click to auto-fill
-                </button>
-              </div>
-
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Email Address
                 </label>
                 <input
@@ -445,7 +470,10 @@ export default function AuthModal({
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -484,7 +512,10 @@ export default function AuthModal({
           {mode === "signup" && step === 1 && (
             <form onSubmit={handleSendOTP} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Full Name
                 </label>
                 <input
@@ -499,7 +530,10 @@ export default function AuthModal({
               </div>
 
               <div>
-                <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="signup-email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Email Address
                 </label>
                 <input
@@ -541,7 +575,10 @@ export default function AuthModal({
                 <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
                   Enter 6-Digit Code
                 </label>
-                <div className="flex gap-1 sm:gap-2 justify-center" onPaste={handleOtpPaste}>
+                <div
+                  className="flex gap-1 sm:gap-2 justify-center"
+                  onPaste={handleOtpPaste}
+                >
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -562,7 +599,10 @@ export default function AuthModal({
               <div className="text-center">
                 {resendCountdown > 0 ? (
                   <p className="text-sm text-gray-600">
-                    Resend code in <span className="font-semibold text-blue-600">{resendCountdown}s</span>
+                    Resend code in{" "}
+                    <span className="font-semibold text-blue-600">
+                      {resendCountdown}s
+                    </span>
                   </p>
                 ) : (
                   <button
@@ -598,7 +638,10 @@ export default function AuthModal({
           {mode === "signup" && step === 3 && (
             <form onSubmit={handleCreateAccount} className="space-y-4">
               <div>
-                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="new-password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -617,20 +660,28 @@ export default function AuthModal({
                         <div
                           key={level}
                           className={`h-1 flex-1 rounded-full transition-colors ${
-                            level <= passwordStrength.strength ? passwordStrength.color : "bg-gray-200"
+                            level <= passwordStrength.strength
+                              ? passwordStrength.color
+                              : "bg-gray-200"
                           }`}
                         />
                       ))}
                     </div>
                     <p className="text-xs text-gray-600">
-                      Password strength: <span className="font-medium">{passwordStrength.label}</span>
+                      Password strength:{" "}
+                      <span className="font-medium">
+                        {passwordStrength.label}
+                      </span>
                     </p>
                   </div>
                 )}
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="confirm-password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Confirm Password
                 </label>
                 <input
@@ -646,15 +697,35 @@ export default function AuthModal({
                   <div className="mt-2">
                     {password === confirmPassword ? (
                       <p className="text-xs text-green-600 flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                         Passwords match
                       </p>
                     ) : (
                       <p className="text-xs text-red-600 flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                         Passwords do not match
                       </p>

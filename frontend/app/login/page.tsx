@@ -16,17 +16,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Autofill test credentials
-  const useTestCredentials = () => {
-    if (role === "uploader") {
-      setEmail("uploader@example.com");
-      setPassword("password123");
-    } else {
-      setEmail("signer@example.com");
-      setPassword("password123");
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -70,40 +59,6 @@ export default function LoginPage() {
             <p className="text-gray-600">
               Enter your credentials to access your dashboard
             </p>
-          </div>
-
-          {/* Test Credentials Banner */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start">
-              <svg
-                className="w-5 h-5 text-blue-600 mr-2 mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-blue-900 mb-1">Test Credentials</p>
-                <p className="text-xs text-blue-700 mb-2">
-                  <strong>Email:</strong> {role === "uploader" ? "uploader@example.com" : "signer@example.com"}
-                  <br />
-                  <strong>Password:</strong> password123
-                </p>
-                <button
-                  type="button"
-                  onClick={useTestCredentials}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-semibold underline"
-                >
-                  Click to auto-fill
-                </button>
-              </div>
-            </div>
           </div>
 
           {error && (

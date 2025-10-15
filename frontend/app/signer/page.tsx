@@ -52,7 +52,7 @@ export default function SignerDashboard() {
     pending: 0,
     signed: 0,
     verified: 0,
-    rejected: 0
+    rejected: 0,
   });
 
   // Filter and pagination states
@@ -103,7 +103,7 @@ export default function SignerDashboard() {
         }
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error("Error fetching stats:", error);
     }
   }, []);
 
@@ -123,14 +123,17 @@ export default function SignerDashboard() {
         limit: itemsPerPage.toString(),
         ...(debouncedSearch && { search: debouncedSearch }),
         ...(statusFilter !== "all" && { status: statusFilter }),
-        ...(dateFilter !== "all" && { dateFilter: dateFilter })
+        ...(dateFilter !== "all" && { dateFilter: dateFilter }),
       });
 
-      const response = await fetch(`${API_ENDPOINTS.DOCUMENTS}?${queryParams}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_ENDPOINTS.DOCUMENTS}?${queryParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch documents");
@@ -143,10 +146,17 @@ export default function SignerDashboard() {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error("Error fetching documents:", error);
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter, dateFilter, router]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    debouncedSearch,
+    statusFilter,
+    dateFilter,
+    router,
+  ]);
 
   // Initial auth check and data fetch
   useEffect(() => {
@@ -183,7 +193,14 @@ export default function SignerDashboard() {
     if (user) {
       fetchDocumentsWithFilters();
     }
-  }, [currentPage, debouncedSearch, statusFilter, dateFilter, user, fetchDocumentsWithFilters]);
+  }, [
+    currentPage,
+    debouncedSearch,
+    statusFilter,
+    dateFilter,
+    user,
+    fetchDocumentsWithFilters,
+  ]);
 
   // Reset to page 1 when filters change (not search - handled in debounce)
   useEffect(() => {
@@ -214,7 +231,9 @@ export default function SignerDashboard() {
         <div className="space-y-6">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Signer Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Signer Dashboard
+            </h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">
               View and sign documents assigned to you
             </p>
@@ -300,11 +319,21 @@ export default function SignerDashboard() {
                   </svg>
                   {searchQuery && (
                     <button
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => setSearchQuery("")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   )}
@@ -322,8 +351,18 @@ export default function SignerDashboard() {
                       <option value="signed">Signed</option>
                       <option value="verified">Verified</option>
                     </select>
-                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
 
@@ -338,8 +377,18 @@ export default function SignerDashboard() {
                       <option value="week">This Week</option>
                       <option value="month">This Month</option>
                     </select>
-                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -347,7 +396,10 @@ export default function SignerDashboard() {
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <label
+                    htmlFor="itemsPerPage"
+                    className="text-sm font-medium text-gray-700 whitespace-nowrap"
+                  >
                     Show:
                   </label>
                   <div className="relative">
@@ -366,18 +418,30 @@ export default function SignerDashboard() {
                       <option value={50}>50</option>
                       <option value={100}>100</option>
                     </select>
-                    <svg className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </div>
 
-                {(searchQuery || statusFilter !== 'all' || dateFilter !== 'all') && (
+                {(searchQuery ||
+                  statusFilter !== "all" ||
+                  dateFilter !== "all") && (
                   <button
                     onClick={() => {
-                      setSearchQuery('');
-                      setStatusFilter('all');
-                      setDateFilter('all');
+                      setSearchQuery("");
+                      setStatusFilter("all");
+                      setDateFilter("all");
                     }}
                     className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all"
                   >
@@ -394,19 +458,34 @@ export default function SignerDashboard() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
-                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
                       #
                     </th>
-                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
                       Document Name
                     </th>
-                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
                       Date
                     </th>
-                    <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                    >
                       Actions
                     </th>
                   </tr>
@@ -416,73 +495,144 @@ export default function SignerDashboard() {
                     <tr>
                       <td colSpan={5} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center justify-center">
-                          <svg className="h-12 w-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          <svg
+                            className="h-12 w-12 text-gray-300 mb-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
                           </svg>
-                          <p className="text-gray-500 text-sm font-medium">No documents found</p>
-                          <p className="text-gray-400 text-xs mt-1">Try adjusting your search or filters</p>
+                          <p className="text-gray-500 text-sm font-medium">
+                            No documents found
+                          </p>
+                          <p className="text-gray-400 text-xs mt-1">
+                            Try adjusting your search or filters
+                          </p>
                         </div>
                       </td>
                     </tr>
                   ) : (
                     documents.map((doc: Document, index: number) => (
-                      <tr key={doc.id} className="hover:bg-blue-50/30 transition-colors duration-150">
+                      <tr
+                        key={doc.id}
+                        className="hover:bg-blue-50/30 transition-colors duration-150"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
-                          {String((currentPage - 1) * itemsPerPage + index + 1).padStart(4, '0')}
+                          {String(
+                            (currentPage - 1) * itemsPerPage + index + 1
+                          ).padStart(4, "0")}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
-                              <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              <svg
+                                className="h-6 w-6 text-blue-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
                               </svg>
                             </div>
                             <div>
-                              <div className="text-sm font-semibold text-gray-900">{doc.name}</div>
-                              <div className="text-xs text-gray-500">PDF Document</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {doc.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                PDF Document
+                              </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(doc.status)}`}>
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(
+                              doc.status
+                            )}`}
+                          >
                             <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5"></span>
-                            {doc.status.charAt(0).toUpperCase() + doc.status.slice(1).toLowerCase()}
+                            {doc.status.charAt(0).toUpperCase() +
+                              doc.status.slice(1).toLowerCase()}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(doc.createdAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
+                            {new Date(doc.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {new Date(doc.createdAt).toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                            {new Date(doc.createdAt).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => router.push(`/signer/preview/${doc.id}`)}
+                              onClick={() =>
+                                router.push(`/signer/preview/${doc.id}`)
+                              }
                               className="icon-button view"
                               title="View Document"
                             >
-                              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
                               </svg>
                             </button>
                             {doc.status?.toLowerCase() === "pending" && (
                               <button
-                                onClick={() => router.push(`/signer/sign/${doc.id}`)}
+                                onClick={() =>
+                                  router.push(`/signer/sign/${doc.id}`)
+                                }
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-800 text-sm font-medium rounded-lg border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 active:scale-[0.98] transition-all shadow-sm"
                                 title="Sign Document"
                               >
-                                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg
+                                  className="h-5 w-5"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
                                   <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                                   <path d="M15 5l4 4" />
                                 </svg>
@@ -491,12 +641,27 @@ export default function SignerDashboard() {
                             )}
                             {doc.status?.toLowerCase() === "signed" && (
                               <button
-                                onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                                onClick={() =>
+                                  window.open(
+                                    `/api/documents/${doc.id}/download`,
+                                    "_blank"
+                                  )
+                                }
                                 className="icon-button download"
                                 title="Download Signed Document"
                               >
-                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                <svg
+                                  className="h-5 w-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                  />
                                 </svg>
                               </button>
                             )}
@@ -532,9 +697,19 @@ export default function SignerDashboard() {
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing <span className="font-semibold text-gray-900">{((currentPage - 1) * itemsPerPage) + 1}</span> to{" "}
-                    <span className="font-semibold text-gray-900">{Math.min(currentPage * itemsPerPage, totalDocuments)}</span> of{" "}
-                    <span className="font-semibold text-gray-900">{totalDocuments}</span> results
+                    Showing{" "}
+                    <span className="font-semibold text-gray-900">
+                      {(currentPage - 1) * itemsPerPage + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-semibold text-gray-900">
+                      {Math.min(currentPage * itemsPerPage, totalDocuments)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-gray-900">
+                      {totalDocuments}
+                    </span>{" "}
+                    results
                   </p>
                 </div>
                 <div>
@@ -545,8 +720,18 @@ export default function SignerDashboard() {
                       className="relative inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       title="First page"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                        />
                       </svg>
                     </button>
                     <button
@@ -555,8 +740,18 @@ export default function SignerDashboard() {
                       className="relative inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       title="Previous page"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
                       </svg>
                     </button>
                     {/* Page numbers with smart ellipsis */}
@@ -583,7 +778,10 @@ export default function SignerDashboard() {
                       // Show ellipsis if needed
                       if (showEllipsisStart) {
                         pages.push(
-                          <span key="ellipsis-start" className="relative inline-flex items-center px-2 py-2 text-sm text-gray-500">
+                          <span
+                            key="ellipsis-start"
+                            className="relative inline-flex items-center px-2 py-2 text-sm text-gray-500"
+                          >
                             ...
                           </span>
                         );
@@ -612,7 +810,10 @@ export default function SignerDashboard() {
                       // Show ellipsis if needed
                       if (showEllipsisEnd) {
                         pages.push(
-                          <span key="ellipsis-end" className="relative inline-flex items-center px-2 py-2 text-sm text-gray-500">
+                          <span
+                            key="ellipsis-end"
+                            className="relative inline-flex items-center px-2 py-2 text-sm text-gray-500"
+                          >
                             ...
                           </span>
                         );
@@ -643,8 +844,18 @@ export default function SignerDashboard() {
                       className="relative inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       title="Next page"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     </button>
                     <button
@@ -653,8 +864,18 @@ export default function SignerDashboard() {
                       className="relative inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       title="Last page"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                        />
                       </svg>
                     </button>
                   </nav>
