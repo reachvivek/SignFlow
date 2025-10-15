@@ -579,118 +579,19 @@ export default function PDFSigningApp({ documentId, documentName }: Props) {
         </div>
       )}
 
-      {/* Controls */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-3">
-          {/* Signature Button */}
-          {!signatureURL && !signedPdfBlob && (
-            <button onClick={() => setSignatureDialogVisible(true)} className="btn-primary">
-              Add Signature
-            </button>
-          )}
-
-          {signedPdfBlob && !signatureURL && (
-            <>
-              <button
-                onClick={() => setSignatureDialogVisible(true)}
-                className="btn-secondary"
-              >
-                Add Another Signature
-              </button>
-              <button
-                onClick={handleSubmitSignedDocument}
-                disabled={isSubmitting}
-                className="btn-primary bg-green-600 hover:bg-green-700 disabled:opacity-50"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Signed Document"}
-              </button>
-            </>
-          )}
-
-          {/* Text Field Buttons */}
-          {pdf && !signatureURL && (
-            <>
-              <button
-                onClick={() => setNameFieldActive(true)}
-                disabled={nameFieldActive}
-                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Name
-              </button>
-              <button
-                onClick={() => setEmailFieldActive(true)}
-                disabled={emailFieldActive}
-                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Email
-              </button>
-              <button
-                onClick={() => setDateFieldActive(true)}
-                disabled={dateFieldActive}
-                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Date
-              </button>
-              <button
-                onClick={() => setCustomTextDialogVisible(true)}
-                disabled={customTextActive}
-                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Custom Text
-              </button>
-            </>
-          )}
-
-          {/* Undo Button */}
-          {pdfHistory.length > 0 && (
-            <button
-              onClick={handleUndo}
-              className="btn-secondary"
-              title="Undo last action"
-            >
-              Undo
-            </button>
-          )}
-
-          {/* Reset Button */}
-          <button
-            onClick={() => {
-              setPdf(null);
-              setSignatureURL(null);
-              setSignedPdfBlob(null);
-              setPdfHistory([]);
-              setPageNum(0);
-              window.location.reload();
-            }}
-            className="btn-secondary"
-          >
-            Reset
-          </button>
-        </div>
-
-        {/* Status indicator */}
-        {signedPdfBlob && !isSubmitting && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span className="text-blue-800 font-medium">
-                Signature applied! You can add more signatures or submit the document.
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* PDF Viewer */}
+      {/* Two Column Layout: PDF Viewer (Left) + Controls Sidebar (Right) */}
       {pdf && (
-        <div>
-          <div
-            ref={documentRef}
-            className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-white mx-auto"
-            style={{ maxWidth: 800 }}
-          >
+        <div className="fixed inset-0 top-16">
+          {/* Left Column - PDF Viewer */}
+          <div className="absolute left-0 right-80 top-0 bottom-0 bg-gray-100 border-r-2 border-gray-300 overflow-hidden">
+            <div className="h-full max-w-7xl mx-auto px-4 py-6">
+              {/* Scrollable PDF area */}
+              <div className="h-full overflow-y-auto overflow-x-hidden">
+                <div
+                  ref={documentRef}
+                  className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-white mx-auto shadow-lg"
+                  style={{ maxWidth: 800 }}
+                >
             {signatureURL && (
               <Draggable nodeRef={draggableRef} onStop={(e, data) => setPosition(data)}>
                 <div
@@ -1035,40 +936,172 @@ export default function PDFSigningApp({ documentId, documentName }: Props) {
               </Draggable>
             )}
 
-            <Document
-              file={pdf}
-              onLoadSuccess={(data) => setTotalPages(data.numPages)}
-            >
-              <Page
-                pageNumber={pageNum + 1}
-                width={800}
-                onLoadSuccess={(data) => setPageDetails(data)}
-              />
-            </Document>
+                  <Document
+                    file={pdf}
+                    onLoadSuccess={(data) => setTotalPages(data.numPages)}
+                  >
+                    <Page
+                      pageNumber={pageNum + 1}
+                      width={800}
+                      onLoadSuccess={(data) => setPageDetails(data)}
+                    />
+                  </Document>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-6 pb-4">
+                    <button
+                      onClick={() => setPageNum(Math.max(0, pageNum - 1))}
+                      disabled={pageNum === 0}
+                      className="btn-secondary disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-gray-700">
+                      Page {pageNum + 1} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setPageNum(Math.min(totalPages - 1, pageNum + 1))}
+                      disabled={pageNum === totalPages - 1}
+                      className="btn-secondary disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-6">
-              <button
-                onClick={() => setPageNum(Math.max(0, pageNum - 1))}
-                disabled={pageNum === 0}
-                className="btn-secondary disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-gray-700">
-                Page {pageNum + 1} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPageNum(Math.min(totalPages - 1, pageNum + 1))}
-                disabled={pageNum === totalPages - 1}
-                className="btn-secondary disabled:opacity-50"
-              >
-                Next
-              </button>
+          {/* Right Column - Controls Sidebar */}
+          <div className="absolute right-0 w-80 top-0 bottom-0 bg-white border-l-2 border-gray-300 shadow-lg flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-900">Document Tools</h3>
+              </div>
+
+              {/* Signature Button - Full Width */}
+              {!signatureURL && !signedPdfBlob && (
+                <button onClick={() => setSignatureDialogVisible(true)} className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-white hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 rounded-lg transition-all shadow-sm mb-4 group" title="Add Signature">
+                  <svg className="w-12 h-12 flex-shrink-0 text-gray-700" viewBox="0 0 120 100" fill="none">
+                    {/* Signature trail/writing */}
+                    <path d="M15 55 Q25 45, 35 52 T55 48 Q65 45, 75 52 L85 58" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
+                    {/* Fountain pen body */}
+                    <g transform="translate(85, 30) rotate(45)">
+                      {/* Pen barrel */}
+                      <rect x="0" y="0" width="8" height="32" rx="1" fill="currentColor" opacity="0.95"/>
+                      {/* Pen cap ring */}
+                      <rect x="0" y="8" width="8" height="2" fill="currentColor" opacity="0.6"/>
+                      {/* Pen nib section */}
+                      <path d="M 2 32 L 4 38 L 6 32 Z" fill="currentColor" opacity="0.95"/>
+                      {/* Nib tip */}
+                      <line x1="4" y1="38" x2="4" y2="42" stroke="currentColor" strokeWidth="1.5" opacity="0.9"/>
+                      {/* Nib slit */}
+                      <line x1="4" y1="38" x2="4" y2="32" stroke="white" strokeWidth="0.5" opacity="0.5"/>
+                    </g>
+                  </svg>
+                  <span className="text-base font-semibold text-gray-800 tracking-wide">Add Your Signature</span>
+                </button>
+              )}
+
+              {signedPdfBlob && !signatureURL && (
+                <button onClick={() => setSignatureDialogVisible(true)} className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-white hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 rounded-lg transition-all shadow-sm mb-4 group" title="Add Another Signature">
+                  <svg className="w-12 h-12 flex-shrink-0 text-gray-700" viewBox="0 0 120 100" fill="none">
+                    {/* Signature trail/writing */}
+                    <path d="M15 55 Q25 45, 35 52 T55 48 Q65 45, 75 52 L85 58" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
+                    {/* Fountain pen body */}
+                    <g transform="translate(85, 30) rotate(45)">
+                      {/* Pen barrel */}
+                      <rect x="0" y="0" width="8" height="32" rx="1" fill="currentColor" opacity="0.95"/>
+                      {/* Pen cap ring */}
+                      <rect x="0" y="8" width="8" height="2" fill="currentColor" opacity="0.6"/>
+                      {/* Pen nib section */}
+                      <path d="M 2 32 L 4 38 L 6 32 Z" fill="currentColor" opacity="0.95"/>
+                      {/* Nib tip */}
+                      <line x1="4" y1="38" x2="4" y2="42" stroke="currentColor" strokeWidth="1.5" opacity="0.9"/>
+                      {/* Nib slit */}
+                      <line x1="4" y1="38" x2="4" y2="32" stroke="white" strokeWidth="0.5" opacity="0.5"/>
+                    </g>
+                    {/* Plus icon for "Add Another" */}
+                    <circle cx="25" cy="25" r="10" fill="currentColor" opacity="0.3"/>
+                    <line x1="18" y1="25" x2="32" y2="25" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                    <line x1="25" y1="18" x2="25" y2="32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  </svg>
+                  <span className="text-base font-semibold text-gray-800 tracking-wide">Add Another Signature</span>
+                </button>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+
+                {/* Text Field Buttons */}
+                {pdf && !signatureURL && (
+                  <>
+                    <button onClick={() => setNameFieldActive(true)} disabled={nameFieldActive} className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed" title="Add Name">
+                      <svg className="w-8 h-8 text-gray-600 group-hover:text-gray-700 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-700">Name</span>
+                    </button>
+                    <button onClick={() => setEmailFieldActive(true)} disabled={emailFieldActive} className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed" title="Add Email">
+                      <svg className="w-8 h-8 text-gray-600 group-hover:text-gray-700 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-700">Email</span>
+                    </button>
+                    <button onClick={() => setDateFieldActive(true)} disabled={dateFieldActive} className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed" title="Add Date">
+                      <svg className="w-8 h-8 text-gray-600 group-hover:text-gray-700 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-700">Date</span>
+                    </button>
+                    <button onClick={() => setCustomTextDialogVisible(true)} disabled={customTextActive} className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed" title="Add Custom Text">
+                      <svg className="w-8 h-8 text-gray-600 group-hover:text-gray-700 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-700">Text</span>
+                    </button>
+                  </>
+                )}
+
+                {/* Undo Button */}
+                {pdfHistory.length > 0 && (
+                  <button onClick={handleUndo} className="col-span-2 flex items-center justify-center gap-2 p-3 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-lg transition-colors" title="Undo last action">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    <span className="text-sm font-medium text-amber-700">Undo Last Action</span>
+                  </button>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Fixed Bottom Action Buttons */}
+            <div className="border-t border-gray-200 p-4 bg-gray-50 space-y-2">
+              {/* Submit Button */}
+              {signedPdfBlob && !signatureURL && (
+                <button onClick={handleSubmitSignedDocument} disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="font-medium">{isSubmitting ? "Submitting..." : "Submit Document"}</span>
+                </button>
+              )}
+
+              {/* Reset Button - Only show if there's something to reset */}
+              {(signedPdfBlob || pdfHistory.length > 0) && (
+                <button onClick={() => { setPdf(null); setSignatureURL(null); setSignedPdfBlob(null); setPdfHistory([]); setPageNum(0); window.location.reload(); }} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors shadow-sm">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span className="font-medium">Reset Document</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

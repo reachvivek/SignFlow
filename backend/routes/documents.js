@@ -142,13 +142,72 @@ router.post('/upload', authenticate, isUploader, upload.single('file'), async (r
 });
 
 /**
+ * @route   GET /api/documents/stats
+ * @desc    Get document statistics for current user
+ * @access  Private
+ */
+router.get('/stats', authenticate, async (req, res) => {
+  try {
+    let where = {};
+
+    // Filter based on user role
+    if (req.userRole === 'UPLOADER') {
+      where.uploadedById = req.userId;
+    } else if (req.userRole === 'SIGNER') {
+      // Get user email to match assignedTo
+      const user = await prisma.user.findUnique({
+        where: { id: req.userId },
+      });
+      where.assignedTo = user.email;
+    }
+
+    // Get counts for each status
+    const [pending, signed, verified, rejected] = await Promise.all([
+      prisma.document.count({ where: { ...where, status: 'PENDING' } }),
+      prisma.document.count({ where: { ...where, status: 'SIGNED' } }),
+      prisma.document.count({ where: { ...where, status: 'VERIFIED' } }),
+      prisma.document.count({ where: { ...where, status: 'REJECTED' } }),
+    ]);
+
+    console.log(`📊 Stats retrieved for user role: ${req.userRole}`);
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        pending,
+        signed,
+        verified,
+        rejected,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Get stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server error',
+    });
+  }
+});
+
+/**
  * @route   GET /api/documents
- * @desc    Get documents for current user
+ * @desc    Get documents for current user with pagination and filters
  * @access  Private
  */
 router.get('/', authenticate, async (req, res) => {
   try {
-    const { status } = req.query;
+    const {
+      status,
+      page = '1',
+      limit = '10',
+      search = '',
+      dateFilter = 'all'
+    } = req.query;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
     let where = {};
 
     // Filter based on user role
@@ -163,10 +222,56 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     // Filter by status if provided
-    if (status) {
+    if (status && status !== 'all') {
       where.status = status.toUpperCase();
     }
 
+    // Filter by search query (document name or original file name)
+    if (search && search.trim() !== '') {
+      where.OR = [
+        {
+          name: {
+            contains: search.trim(),
+          },
+        },
+        {
+          originalFileName: {
+            contains: search.trim(),
+          },
+        },
+      ];
+    }
+
+    // Filter by date
+    if (dateFilter && dateFilter !== 'all') {
+      const now = new Date();
+      let startDate;
+
+      switch (dateFilter) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        default:
+          startDate = null;
+      }
+
+      if (startDate) {
+        where.createdAt = {
+          gte: startDate,
+        };
+      }
+    }
+
+    // Get total count for pagination
+    const total = await prisma.document.count({ where });
+
+    // Get paginated documents
     const documents = await prisma.document.findMany({
       where,
       include: {
@@ -181,14 +286,19 @@ router.get('/', authenticate, async (req, res) => {
       orderBy: {
         createdAt: 'desc',
       },
+      skip,
+      take: limitNum,
     });
 
-    console.log(`📋 Retrieved ${documents.length} documents for user role: ${req.userRole}`);
+    console.log(`📋 Retrieved ${documents.length} of ${total} documents for user role: ${req.userRole} (page ${pageNum})`);
 
     res.status(200).json({
       success: true,
-      count: documents.length,
       documents,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
     });
   } catch (error) {
     console.error('❌ Get documents error:', error);

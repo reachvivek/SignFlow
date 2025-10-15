@@ -98,7 +98,7 @@ export default function Header({ user }: HeaderProps) {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                  className="text-sm text-gray-700 hover:text-gray-900 flex items-center gap-2 px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors font-medium border border-gray-300"
                 >
                   Logout
                 </button>

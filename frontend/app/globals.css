@@ -97,3 +97,68 @@ body {
 .animate-progress {
   animation: progress 2s ease-in-out infinite;
 }
+
+/* Icon Button Styles */
+.icon-button {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+  color: #6b7280;
+  background-color: transparent;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.icon-button:active {
+  transform: scale(0.95);
+}
+
+.icon-button.view {
+  color: #3b82f6;
+}
+
+.icon-button.view:hover {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.icon-button.sign {
+  color: #8b5cf6;
+}
+
+.icon-button.sign:hover {
+  background-color: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #7c3aed;
+}
+
+.icon-button.download {
+  color: #10b981;
+}
+
+.icon-button.download:hover {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #059669;
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon-button:disabled:hover {
+  background-color: transparent;
+  border-color: transparent;
+  transform: none;
+}
